@@ -31,6 +31,8 @@ export async function cli(): Promise<void> {
   }
 
   const viewer = new Viewer(input, {
+    output: process.stdout,
+    input: process.stdin,
     skipIntro: values['skip-intro'] ?? false,
   });
   await viewer.start();

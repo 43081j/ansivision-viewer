@@ -6,6 +6,8 @@ import { playIntro } from './intro.js';
 const BAR_BG = ['bgGray', 'white'] as const;
 
 export interface ViewerOptions {
+  output: NodeJS.WriteStream;
+  input: NodeJS.ReadStream;
   skipIntro?: boolean;
 }
 
@@ -15,16 +17,20 @@ export class Viewer {
   #renderer: Renderer | null = null;
   #source: string;
   #skipIntro: boolean;
+  #output: NodeJS.WriteStream;
+  #input: NodeJS.ReadStream;
 
-  public constructor(input: string, options: ViewerOptions = {}) {
+  public constructor(input: string, options: ViewerOptions) {
     this.#source = input;
+    this.#output = options.output;
+    this.#input = options.input;
     this.#skipIntro = options.skipIntro ?? false;
   }
 
   public async start(): Promise<void> {
     this.#renderer = await renderString(this.#source);
     if (!this.#skipIntro) {
-      await playIntro(process.stdout);
+      await playIntro(this.#output);
     }
     this.#initialRender();
     this.#render();
@@ -35,14 +41,14 @@ export class Viewer {
       clearInterval(this.#timer);
       this.#timer = null;
     }
-    process.stdin.off('data', this.#onStdin);
-    process.stdin.setRawMode(false);
-    process.stdin.pause();
-    process.stdout.write(SHOW + '\n');
+    this.#input.off('data', this.#onStdin);
+    this.#input.setRawMode(false);
+    this.#input.pause();
+    this.#output.write(SHOW + '\n');
   }
 
   #renderBar(left: string, right: string = ''): string {
-    const width = process.stdout.columns || 80;
+    const width = this.#output.columns || 80;
     const used =
       stripVTControlCharacters(left).length +
       stripVTControlCharacters(right).length;
@@ -57,11 +63,11 @@ export class Viewer {
   }
 
   #initialRender(): void {
-    process.stdin.on('data', this.#onStdin);
-    process.stdout.write(HIDE);
-    process.stdin.setRawMode(true);
-    process.stdin.resume();
-    process.stdin.setEncoding('utf8');
+    this.#input.on('data', this.#onStdin);
+    this.#output.write(HIDE);
+    this.#input.setRawMode(true);
+    this.#input.resume();
+    this.#input.setEncoding('utf8');
   }
 
   #onStdin = (key: string): void => {
@@ -165,8 +171,8 @@ export class Viewer {
     if (!this.#renderer) {
       return;
     }
-    const rows = process.stdout.rows || 24;
-    process.stdout.write(
+    const rows = this.#output.rows || 24;
+    this.#output.write(
       CLEAR +
         this.#header() +
         '\n' +
