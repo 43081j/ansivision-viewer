@@ -55,7 +55,6 @@
     "vitest": "^4.1.5"
   },
   "dependencies": {
-    "@clack/prompts": "^1.4.0",
     "ansivision": "^0.2.7"
   }
 }
