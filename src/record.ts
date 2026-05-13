@@ -4,14 +4,17 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 const LEADING_META = /^(?:Script started|Command:)[^\n]*\n/;
-const TRAILING_META = /\n(?:Script done|Command exit status:)[^\n]*(?=\n|$)/g;
+const TRAILING_META = /\n(?:Script done|Command exit status:)[^\n]*\n?$/;
 
 function trimScriptWrapping(data: string): string {
   let out = data;
   while (LEADING_META.test(out)) {
     out = out.replace(LEADING_META, '');
   }
-  return out.replace(TRAILING_META, '');
+  while (TRAILING_META.test(out)) {
+    out = out.replace(TRAILING_META, '');
+  }
+  return out;
 }
 
 export async function record(): Promise<string> {
