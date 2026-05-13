@@ -5,19 +5,27 @@ import { playIntro } from './intro.js';
 
 const BAR_BG = ['bgGray', 'white'] as const;
 
+export interface ViewerOptions {
+  skipIntro?: boolean;
+}
+
 export class Viewer {
   #timer: NodeJS.Timeout | null = null;
   #index: number = 0;
   #renderer: Renderer | null = null;
   #source: string;
+  #skipIntro: boolean;
 
-  public constructor(input: string) {
+  public constructor(input: string, options: ViewerOptions = {}) {
     this.#source = input;
+    this.#skipIntro = options.skipIntro ?? false;
   }
 
   public async start(): Promise<void> {
     this.#renderer = await renderString(this.#source);
-    await playIntro(process.stdout);
+    if (!this.#skipIntro) {
+      await playIntro(process.stdout);
+    }
     this.#initialRender();
     this.#render();
   }
