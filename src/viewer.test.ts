@@ -1,15 +1,30 @@
 import { EventEmitter } from 'node:events';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  type Mock,
+  vi,
+} from 'vitest';
 import { PLAY_INTERVAL } from './constants.js';
 import { Viewer } from './viewer.js';
 
+interface MockReadStreamExtension {
+  setRawMode: Mock;
+  pause: Mock;
+  resume: Mock;
+  setEncoding: Mock;
+}
+
+interface MockWriteStreamExtension {
+  written: string[];
+}
+
 function makeInput(): NodeJS.ReadStream {
-  const input = new EventEmitter() as unknown as NodeJS.ReadStream & {
-    setRawMode: ReturnType<typeof vi.fn>;
-    pause: ReturnType<typeof vi.fn>;
-    resume: ReturnType<typeof vi.fn>;
-    setEncoding: ReturnType<typeof vi.fn>;
-  };
+  const input = new EventEmitter() as unknown as NodeJS.ReadStream &
+    MockReadStreamExtension;
   input.setRawMode = vi.fn();
   input.pause = vi.fn();
   input.resume = vi.fn();
@@ -17,12 +32,12 @@ function makeInput(): NodeJS.ReadStream {
   return input;
 }
 
-function makeOutput(): NodeJS.WriteStream & { written: string[] } {
+function makeOutput(): NodeJS.WriteStream & MockWriteStreamExtension {
   const output = {
     columns: 80,
     rows: 24,
     written: [] as string[],
-    write(chunk: string) {
+    write(this: MockWriteStreamExtension, chunk: string) {
       this.written.push(chunk);
       return true;
     },
