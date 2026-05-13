@@ -131,8 +131,8 @@ export class Viewer {
     const renderer = this.#renderer!;
     const playing = this.#timer !== null;
     const status = playing
-      ? styleText(['bgGray', 'greenBright', 'bold'], ' ▶  PLAY  ')
-      : styleText(['bgGray', 'yellowBright', 'bold'], ' ⏸  PAUSE ');
+      ? styleText(['bgGray', 'greenBright', 'bold'], ' ▶  PLAYING ')
+      : styleText(['bgGray', 'yellowBright', 'bold'], ' ⏸  PAUSED  ');
     const sep = styleText(['bgGray', 'gray'], '│ ');
     const title = styleText(
       ['bgGray', 'whiteBright', 'bold'],
