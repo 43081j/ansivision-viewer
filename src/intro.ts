@@ -47,6 +47,7 @@ export async function playIntro(stream: NodeJS.WriteStream): Promise<void> {
       }
     }
     stream.write(out);
+    // oxlint-disable-next-line no-await-in-loop
     await sleep(FRAME_MS);
   }
 
