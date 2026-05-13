@@ -1,6 +1,7 @@
 import { stripVTControlCharacters, styleText } from 'node:util';
 import { Renderer, renderString } from 'ansivision';
 import { CLEAR, HIDE, PLAY_INTERVAL, SHOW } from './constants.js';
+import { playIntro } from './intro.js';
 
 const BAR_BG = ['bgGray', 'white'] as const;
 
@@ -16,6 +17,7 @@ export class Viewer {
 
   public async start(): Promise<void> {
     this.#renderer = await renderString(this.#source);
+    await playIntro(process.stdout);
     this.#initialRender();
     this.#render();
   }
