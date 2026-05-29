@@ -176,7 +176,7 @@ export class Viewer {
       CLEAR +
         this.#header() +
         '\n' +
-        this.#renderer.currentFrame +
+        this.#renderer.currentStyledFrame +
         `\x1b[${rows};1H` +
         this.#footer(),
     );
