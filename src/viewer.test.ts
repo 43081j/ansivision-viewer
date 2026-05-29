@@ -168,4 +168,21 @@ describe('Viewer', () => {
     input.emit('data', 'x');
     expect(output.written.length).toBe(before);
   });
+
+  it('resets styles at the end of each frame so they do not leak', async () => {
+    const styledSource = '\x1b[31mred\x1b[2J\x1b[32mgreen';
+    viewer = new Viewer(styledSource, { input, output, skipIntro: true });
+    await viewer.start();
+
+    const frame1 = output.written.join('');
+    expect(frame1).toContain('\x1b[0;31mred\x1b[0m');
+
+    output.written.length = 0;
+    input.emit('data', 'l');
+
+    const frame2 = output.written.join('');
+    expect(frame2).toContain('\x1b[0;32mgreen\x1b[0m');
+    expect(frame2).not.toContain('\x1b[0;31m');
+    expect(frame2).not.toContain('red');
+  });
 });
